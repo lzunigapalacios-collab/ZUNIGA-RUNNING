@@ -17,7 +17,31 @@
   const MAP_CENTER=[16.2885,-94.1943];
   const OSM_ATTRIBUTION='&copy; OpenStreetMap contributors (ODbL)';
   function offlineRoadStyle(feature){const highway=(feature.properties||{}).highway;const major=["motorway","trunk","primary","secondary","tertiary"].includes(highway);return{color:major?"#819780":"#b0beb0",weight:major?3.4:1.7,opacity:1,lineCap:"round",lineJoin:"round"}}
-  function applyMapMode(map,mode){if(!map||!window.L)return;if(mode==="satellite"&&!navigator.onLine){if($("mapMode"))$("mapMode").value="offline";mode="offline";alert("La vista satelital necesita internet. Cambié el mapa a calles offline.")}if(map._zrSatelliteLayer){map.removeLayer(map._zrSatelliteLayer);map._zrSatelliteLayer=null}if(map._zrRoadLayer){map.removeLayer(map._zrRoadLayer);map._zrRoadLayer=null}if(mode==="satellite"){map._zrSatelliteLayer=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Sources: Esri, Vantor, Earthstar Geographics, and the GIS User Community"}).addTo(map)}else if(roadsData){map._zrRoadLayer=L.geoJSON(roadsData,{style:offlineRoadStyle,onEachFeature:(feature,layer)=>{const props=feature.properties||{};if(props.name&&["motorway","trunk","primary","secondary","tertiary"].includes(props.highway))layer.bindTooltip(props.name,{sticky:true,className:"road-label",opacity:.92)}}).addTo(map)}if(map===liveMap&&liveLine)liveLine.bringToFront();if(map===detailMap&&detailLine)detailLine.bringToFront()}
+  function applyMapMode(map,mode){
+    if(!map||!window.L)return;
+    if(mode==="satellite"&&!navigator.onLine){
+      if($("mapMode"))$("mapMode").value="offline";
+      mode="offline";
+      alert("La vista satelital necesita internet. Cambié el mapa a calles offline.");
+    }
+    if(map._zrSatelliteLayer){map.removeLayer(map._zrSatelliteLayer);map._zrSatelliteLayer=null;}
+    if(map._zrRoadLayer){map.removeLayer(map._zrRoadLayer);map._zrRoadLayer=null;}
+    if(mode==="satellite"){
+      map._zrSatelliteLayer=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Sources: Esri, Vantor, Earthstar Geographics, and the GIS User Community"}).addTo(map);
+    }else if(roadsData){
+      map._zrRoadLayer=L.geoJSON(roadsData,{
+        style:offlineRoadStyle,
+        onEachFeature:(feature,layer)=>{
+          const props=feature.properties||{};
+          if(props.name&&["motorway","trunk","primary","secondary","tertiary"].includes(props.highway)){
+            layer.bindTooltip(props.name,{sticky:true,className:"road-label",opacity:.92});
+          }
+        }
+      }).addTo(map);
+    }
+    if(map===liveMap&&liveLine)liveLine.bringToFront();
+    if(map===detailMap&&detailLine)detailLine.bringToFront();
+  }
   function loadOfflineRoads(){if(!roadsLoadPromise){roadsLoadPromise=fetch("./data/chahuites-roads.geojson").then(response=>{if(!response.ok)throw new Error("No se encontró el mapa offline");return response.json()}).then(data=>{if(!data||data.type!=="FeatureCollection"||!Array.isArray(data.features)||!data.features.length)throw new Error("El mapa offline no contiene calles");roadsData=data;if(liveMap)applyMapMode(liveMap,$("mapMode")?$("mapMode").value:"offline");if(detailMap)applyMapMode(detailMap,$("mapMode")?$("mapMode").value:"offline");return data}).catch(()=>{roadsData=null;return null})}return roadsLoadPromise}
   function initMap(){if(!window.L){$("liveMap").innerHTML='<div class="map-fallback">No se pudo cargar el motor de mapas guardado en el dispositivo.</div>';return}liveMap=L.map("liveMap",{zoomControl:true,attributionControl:true}).setView(MAP_CENTER,14);liveMap.attributionControl.addAttribution(OSM_ATTRIBUTION);liveLine=L.polyline([],{color:"#8bbd45",weight:5,lineCap:"round",lineJoin:"round"}).addTo(liveMap);applyMapMode(liveMap,"offline");loadOfflineRoads();setTimeout(()=>liveMap.invalidateSize(),60)}
   function start(){if(!( "geolocation" in navigator)){setGps("GPS no disponible","bad");alert("Este navegador no permite acceder al GPS.");return}if(!window.isSecureContext){alert("Por seguridad, el GPS necesita abrir la app desde GitHub Pages (HTTPS).");return}state.active=true;state.paused=false;$("activityType").disabled=true;state.startedAt=Date.now();state.segmentStartedAt=Date.now();state.elapsedBeforeSegment=0;state.elapsedMs=0;state.distance=0;state.points=[];state.lastPoint=null;state.lastSplitKm=0;state.splits=[];state.maxSpeedKmh=0;$("startBtn").hidden=true;$("activeActions").hidden=false;$("pauseBtn").textContent="Ⅱ Pausar";setGps("Buscando señal…");renderMetrics();resetLiveMap();ticker=setInterval(renderMetrics,500);state.watchId=navigator.geolocation.watchPosition(onPosition,onGpsError,{enableHighAccuracy:true,maximumAge:1000,timeout:20000});}
