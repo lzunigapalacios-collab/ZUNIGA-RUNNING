@@ -179,15 +179,24 @@
   function renderHistory(){
     const list=$("historyList");list.replaceChildren();$("emptyHistory").hidden=activities.length>0;
     activities.forEach(a=>{
+      const row=document.createElement("div");row.className="history-row";
       const article=document.createElement("button");article.type="button";article.className="history-item history-button";article.setAttribute("aria-label","Ver actividad del "+fmtDate(a.date));
       const icon=document.createElement("div");icon.className="history-icon";icon.textContent="↗";
       const main=document.createElement("div");main.className="history-main";
       const title=document.createElement("strong");title.textContent=a.type==="caminar"?"Caminata":a.type==="correr"?"Carrera":"Carrera o caminata";
-      const meta=document.createElement("small");meta.textContent=fmtDate(a.date)+" · "+fmtShortTime(a.durationMs)+" · "+a.pace+" min/km";
+      const meta=document.createElement("small");meta.textContent=fmtDate(a.date)+" · "+fmtShortTime(a.durationMs)+" · "+(a.pace||fmtPace(a.durationMs,a.distance))+" min/km";
       const distance=document.createElement("div");distance.className="history-distance";distance.textContent=Number(a.distance).toFixed(2)+" km";
       const sub=document.createElement("small");sub.textContent="≈ "+(a.calories||0)+" kcal";
       distance.appendChild(sub);main.append(title,meta);article.append(icon,main,distance);
-      article.addEventListener("click",()=>openActivity(a));list.appendChild(article);
+      article.addEventListener("click",()=>openActivity(a));
+      const deleteBtn=document.createElement("button");deleteBtn.type="button";deleteBtn.className="delete-activity-btn";deleteBtn.textContent="Eliminar";deleteBtn.setAttribute("aria-label","Eliminar "+(a.type==="caminar"?"caminata":"carrera")+" del "+fmtDate(a.date));
+      deleteBtn.addEventListener("click",event=>{
+        event.stopPropagation();
+        if(!confirm("¿Eliminar esta actividad de "+fmtDate(a.date)+" ("+Number(a.distance).toFixed(2)+" km)? Esta acción no se puede deshacer."))return;
+        activities=activities.filter(item=>item!==a);
+        saveActivities();renderHistory();renderStats();
+      });
+      row.append(article,deleteBtn);list.appendChild(row);
     });
   }
 
