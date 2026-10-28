@@ -239,45 +239,71 @@
   
   $("exportBtn").addEventListener("click",()=>{if(!activities.length){alert("Todavía no tienes actividades para exportar.");return}const rows=[["fecha","tipo_actividad","distancia_km","duracion_segundos","ritmo_min_km","calorias_estimadas","puntos_gps"],...activities.map(a=>[a.date,a.type||"sin especificar",a.distance,Math.round(a.durationMs/1000),a.pace,a.calories,(a.points||[]).length])];const csv=rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");const url=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"}));const link=document.createElement("a");link.href=url;link.download="zuniga-running-historial.csv";link.click();URL.revokeObjectURL(url)});
   
-  // --- NUEVA FUNCIÓN: IMPORTAR RESPALDOS (JSON) ---
-  const historySec = document.querySelector(".history-section .section-title div:last-child") || document.querySelector(".history-section .section-title");
-  // Añadimos el botón de importar al lado del de exportar si no existe
-  if(!$("importBtn") && $("exportBtn")){
+  // --- RESPALDOS JSON: exportar e importar de forma segura ---
+  if ($("exportBtn") && !$("backupJsonBtn")) {
+    const backupBtn = document.createElement("button");
+    backupBtn.id = "backupJsonBtn";
+    backupBtn.className = "text-button";
+    backupBtn.textContent = "Respaldar JSON ↓";
+    $("exportBtn").parentNode.insertBefore(backupBtn, $("exportBtn").nextSibling);
+
+    backupBtn.addEventListener("click", () => {
+      const json = JSON.stringify(activities, null, 2);
+      const url = URL.createObjectURL(new Blob([json], {type:"application/json;charset=utf-8"}));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "zuniga-running-respaldo.json";
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+  }
+
+  if (!$("importBtn") && $("exportBtn")) {
     const impBtn = document.createElement("button");
     impBtn.id = "importBtn";
     impBtn.className = "text-button";
-    impBtn.textContent = "Importar ↗";
+    impBtn.textContent = "Importar JSON ↑";
     $("exportBtn").parentNode.insertBefore(impBtn, $("exportBtn"));
-    
+
     const fileInp = document.createElement("input");
     fileInp.type = "file";
     fileInp.id = "importFile";
-    fileInp.accept = ".json";
+    fileInp.accept = ".json,application/json";
     fileInp.style.display = "none";
     document.body.appendChild(fileInp);
 
     impBtn.addEventListener("click", () => fileInp.click());
     fileInp.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if(!file) return;
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
       const reader = new FileReader();
       reader.onload = (ev) => {
         try {
           const imported = JSON.parse(ev.target.result);
-          if(!Array.isArray(imported)) throw new Error();
-          if(confirm(`Se encontraron ${imported.length} actividades. ¿Deseas fusionarlas con tu historial actual?\n\n- Aceptar: Fusionar\n- Cancelar: Reemplazar todo`)){
-            const existingIds = new Set(activities.map(a => a.id));
-            activities = [...imported.filter(item => !existingIds.has(item.id)), ...activities];
-          } else {
-            activities = imported;
+          if (!Array.isArray(imported)) throw new Error("El respaldo debe contener una lista.");
+
+          const valid = imported.every(item =>
+            item && typeof item === "object" &&
+            Number.isFinite(Number(item.distance)) && Number(item.distance) >= 0 &&
+            Number.isFinite(Number(item.durationMs)) && Number(item.durationMs) >= 0 &&
+            typeof item.date === "string" &&
+            Array.isArray(item.points || [])
+          );
+          if (!valid) throw new Error("El respaldo contiene actividades con datos inválidos.");
+
+          if (!confirm("Se encontraron " + imported.length + " actividades.\n\nAceptar: fusionar con el historial actual.\nCancelar: no importar nada.")) {
+            return;
           }
-          activities = activities.slice(0, 100);
+
+          const existingIds = new Set(activities.map(item => String(item.id)));
+          const additions = imported.filter(item => !existingIds.has(String(item.id)));
+          activities = [...additions, ...activities].slice(0, 100);
           saveActivities();
           renderHistory();
           renderStats();
-          alert("¡Historial importado exitosamente!");
-        } catch {
-          alert("El archivo no es válido. Asegúrate de importar un respaldo JSON correcto.");
+          alert("Respaldo importado. Se añadieron " + additions.length + " actividades nuevas; no se reemplazó tu historial.");
+        } catch (error) {
+          alert("No se importó el archivo. Comprueba que sea un respaldo JSON válido de ZUÑIGA RUNNING.\n\n" + (error.message || ""));
         } finally {
           fileInp.value = "";
         }
