@@ -8,6 +8,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <title>ZUÑIGA RUNNING</title>
 </head>
 <body>
@@ -38,14 +39,8 @@
         <div class="metric"><span id="calories">0</span><small>CALORÍAS EST.*</small></div>
       </div>
       <div class="route-wrap">
-        <div class="route-heading"><span>Tu recorrido</span><span id="pointsLabel">Esperando GPS</span></div>
-        <svg id="routeSvg" viewBox="0 0 320 110" role="img" aria-label="Dibujo del recorrido GPS">
-          <path class="route-grid" d="M0 27H320 M0 55H320 M0 83H320 M53 0V110 M106 0V110 M159 0V110 M212 0V110 M265 0V110"/>
-          <path id="routePath" class="route-line" d=""/>
-          <circle id="routeStart" cx="0" cy="0" r="4" class="route-start" opacity="0"/>
-          <circle id="routeEnd" cx="0" cy="0" r="5" class="route-end" opacity="0"/>
-          <text id="routePlaceholder" x="160" y="60" text-anchor="middle">Tu ruta aparecerá aquí</text>
-        </svg>
+        <div class="route-heading"><span>Mapa en vivo</span><span id="pointsLabel">Esperando GPS</span></div>
+        <div id="liveMap" class="map-box" aria-label="Mapa del recorrido en vivo"></div>
       </div>
       <div class="tracker-actions">
         <button id="startBtn" class="btn btn-primary">▶ Iniciar entrenamiento</button>
@@ -54,7 +49,7 @@
           <button id="finishBtn" class="btn btn-finish">■ Finalizar</button>
         </div>
       </div>
-      <p class="hint">Permite el acceso a la ubicación y mantén esta página abierta durante tu actividad. El GPS funciona en HTTPS.</p>
+      <p class="hint">Permite el acceso a la ubicación. Para esta prueba mantén la pantalla encendida; después probaremos pantalla apagada.</p>
     </section>
 
     <section class="section-block">
@@ -74,7 +69,7 @@
     </section>
 
     <section class="notice"><strong>Importante</strong><p>* Las calorías son una estimación orientativa. La distancia y el ritmo dependen de la señal GPS. Tus entrenamientos se guardan en este dispositivo; si borras los datos del navegador, podrías perderlos.</p></section>
-    <footer>HECHO PARA AVANZAR · ZUÑIGA RUNNING <span>v1.0</span></footer>
+    <footer>HECHO PARA AVANZAR · ZUÑIGA RUNNING <span>v1.1</span></footer>
   </main>
 
   <dialog id="finishDialog" class="finish-dialog">
@@ -83,6 +78,20 @@
     <div class="dialog-stats"><div><small>Distancia</small><strong id="finalDistance">0 km</strong></div><div><small>Tiempo</small><strong id="finalDuration">00:00</strong></div><div><small>Ritmo</small><strong id="finalPace">--:--</strong></div></div>
     <button id="closeDialog" class="btn btn-primary">Continuar</button>
   </dialog>
+
+  <dialog id="detailDialog" class="detail-dialog">
+    <div class="detail-head"><div><p class="eyebrow">ACTIVIDAD</p><h2 id="detailTitle">Carrera</h2><p id="detailDate" class="muted"></p></div><button id="closeDetail" class="dialog-close" aria-label="Cerrar">×</button></div>
+    <div id="detailMap" class="detail-map" aria-label="Mapa del recorrido guardado"></div>
+    <div class="detail-stats">
+      <div><small>Distancia</small><strong id="detailDistance">0 km</strong></div>
+      <div><small>Tiempo</small><strong id="detailDuration">00:00</strong></div>
+      <div><small>Ritmo</small><strong id="detailPace">--:--</strong></div>
+      <div><small>Calorías</small><strong id="detailCalories">0</strong></div>
+    </div>
+    <button id="closeDetailBottom" class="btn btn-primary">Cerrar</button>
+  </dialog>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="app.js"></script>
 </body>
 </html>
