@@ -1,0 +1,14 @@
+{
+  "name": "ZUÑIGA RUNNING",
+  "short_name": "ZUÑIGA RUN",
+  "description": "Registra tus carreras y caminatas con GPS.",
+  "lang": "es-MX",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b110e",
+  "theme_color": "#101a16",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
