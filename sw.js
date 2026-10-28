@@ -1,11 +1,14 @@
-const CACHE_NAME = "zr-shell-v2";
+const CACHE_NAME = "zr-shell-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./style.css",
   "./app.js",
   "./manifest.json",
-  "./icon.svg"
+  "./icon.svg",
+  "./vendor/leaflet/leaflet.js",
+  "./vendor/leaflet/leaflet.css",
+  "./data/chahuites-roads.geojson"
 ];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
@@ -28,7 +31,7 @@ self.addEventListener("fetch", event => {
       return;
     }
     event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {
-      if (response.ok && (url.pathname.endsWith(".js") || url.pathname.endsWith(".css") || url.pathname.endsWith(".json") || url.pathname.endsWith(".svg"))) {
+      if (response.ok && (url.pathname.endsWith(".js") || url.pathname.endsWith(".css") || url.pathname.endsWith(".json") || url.pathname.endsWith(".geojson") || url.pathname.endsWith(".svg"))) {
         const copy = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
       }
