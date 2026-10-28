@@ -1,97 +1,19 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#101a16">
-  <meta name="description" content="ZUÑIGA RUNNING: registra tus carreras y caminatas con GPS, ritmo, distancia e historial.">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#101a16"><meta name="description" content="ZUÑIGA RUNNING: registra tus carreras y caminatas con GPS, ritmo, distancia e historial."><link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <style>.map-box{height:250px;width:100%;border:1px solid #26352b;border-radius:12px;overflow:hidden;background:#18221d}.map-fallback{height:100%;display:grid;place-items:center;padding:20px;text-align:center;color:#9caea2;font-size:12px}.leaflet-container{font-family:'DM Sans',sans-serif;background:#dce6df}.history-button{width:100%;text-align:left;color:inherit}.history-button:active{transform:scale(.99);background:#18241d}.finish-dialog,.detail-dialog{width:calc(100% - 32px);max-width:680px;background:#152019;color:#f2f7f2;border:1px solid #3a4e3e;border-radius:24px;padding:27px;box-shadow:0 30px 100px #0009}.finish-dialog::backdrop,.detail-dialog::backdrop{background:#020604c9;backdrop-filter:blur(5px)}.detail-dialog{padding:20px}.detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px}.detail-head h2{font-family:'Space Grotesk',sans-serif;font-size:25px;margin:0 0 4px}.detail-head .muted{font-size:11px;margin:0}.dialog-close{border:1px solid #28372e;background:#ffffff08;color:#f2f7f2;width:40px;height:40px;border-radius:12px;font-size:25px;line-height:1}.detail-map{height:330px;width:100%;border-radius:14px;overflow:hidden;margin-top:17px;background:#18221d}.detail-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:15px 0}.detail-stats small{display:block;font-size:10px;color:#9caea2;margin-bottom:7px}.detail-stats strong{font-family:'Space Grotesk',sans-serif;font-size:16px}.detail-dialog .btn{width:100%}@media(max-width:500px){.map-box{height:230px}.detail-map{height:280px}.detail-stats{grid-template-columns:repeat(2,1fr)}}</style>
   <title>ZUÑIGA RUNNING</title>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="#" aria-label="ZUÑIGA RUNNING inicio">
-      <span class="brand-mark">ZR</span>
-      <span><strong>ZUÑIGA</strong><small>RUNNING</small></span>
-    </a>
-    <span class="gps-pill"><span id="gpsDot" class="dot"></span><span id="gpsStatus">GPS listo</span></span>
-  </header>
-
-  <main class="shell">
-    <section class="intro">
-      <p class="eyebrow">TU SIGUIENTE META EMPIEZA AQUÍ</p>
-      <h1>Cada kilómetro<br><em>cuenta.</em></h1>
-      <p class="muted">Corre, camina y sigue tu progreso.</p>
-    </section>
-
-    <section class="tracker panel" aria-label="Entrenamiento actual">
-      <div class="tracker-head"><span class="live-label"><span class="live-dot"></span> ENTRENAMIENTO</span><span id="activityLabel" class="muted small">Sin iniciar</span></div>
-      <div class="distance-block">
-        <div id="distance" class="distance">0.00 <span>km</span></div>
-        <div class="metric-caption">DISTANCIA</div>
-      </div>
-      <div class="metrics-grid">
-        <div class="metric"><span id="duration">00:00:00</span><small>TIEMPO</small></div>
-        <div class="metric"><span id="pace">--:--</span><small>RITMO / KM</small></div>
-        <div class="metric"><span id="calories">0</span><small>CALORÍAS EST.*</small></div>
-      </div>
-      <div class="route-wrap">
-        <div class="route-heading"><span>Mapa en vivo</span><span id="pointsLabel">Esperando GPS</span></div>
-        <div id="liveMap" class="map-box" aria-label="Mapa del recorrido en vivo"></div>
-      </div>
-      <div class="tracker-actions">
-        <button id="startBtn" class="btn btn-primary">▶ Iniciar entrenamiento</button>
-        <div id="activeActions" class="action-row" hidden>
-          <button id="pauseBtn" class="btn btn-secondary">Ⅱ Pausar</button>
-          <button id="finishBtn" class="btn btn-finish">■ Finalizar</button>
-        </div>
-      </div>
-      <p class="hint">Permite el acceso a la ubicación. Para esta prueba mantén la pantalla encendida; después probaremos pantalla apagada.</p>
-    </section>
-
-    <section class="section-block">
-      <div class="section-title"><div><p class="eyebrow">TU CONSTANCIA</p><h2>Tu progreso</h2></div><span class="period-tag">Todo el tiempo</span></div>
-      <div class="stats-grid">
-        <article class="stat-card"><span class="stat-icon">↗</span><small>Distancia total</small><strong id="totalDistance">0.00 <i>km</i></strong></article>
-        <article class="stat-card"><span class="stat-icon">◷</span><small>Tiempo en movimiento</small><strong id="totalTime">0 h 00 min</strong></article>
-        <article class="stat-card"><span class="stat-icon">🏁</span><small>Actividades</small><strong id="totalActivities">0</strong></article>
-        <article class="stat-card"><span class="stat-icon">✦</span><small>Mejor ritmo medio</small><strong id="bestPace">--:-- <i>/km</i></strong></article>
-      </div>
-    </section>
-
-    <section class="section-block history-section">
-      <div class="section-title"><div><p class="eyebrow">HECHO POR TI</p><h2>Historial</h2></div><button id="exportBtn" class="text-button">Exportar datos ↗</button></div>
-      <div id="historyList" class="history-list"></div>
-      <p id="emptyHistory" class="empty-state">Todavía no hay actividades. ¡Tu primera salida puede ser hoy!</p>
-    </section>
-
-    <section class="notice"><strong>Importante</strong><p>* Las calorías son una estimación orientativa. La distancia y el ritmo dependen de la señal GPS. Tus entrenamientos se guardan en este dispositivo; si borras los datos del navegador, podrías perderlos.</p></section>
-    <footer>HECHO PARA AVANZAR · ZUÑIGA RUNNING <span>v1.1</span></footer>
-  </main>
-
-  <dialog id="finishDialog" class="finish-dialog">
-    <div class="dialog-mark">✓</div><p class="eyebrow">ACTIVIDAD GUARDADA</p><h2>Buen trabajo.</h2>
-    <p class="muted">Terminaste otra salida. Cada paso suma.</p>
-    <div class="dialog-stats"><div><small>Distancia</small><strong id="finalDistance">0 km</strong></div><div><small>Tiempo</small><strong id="finalDuration">00:00</strong></div><div><small>Ritmo</small><strong id="finalPace">--:--</strong></div></div>
-    <button id="closeDialog" class="btn btn-primary">Continuar</button>
-  </dialog>
-
-  <dialog id="detailDialog" class="detail-dialog">
-    <div class="detail-head"><div><p class="eyebrow">ACTIVIDAD</p><h2 id="detailTitle">Carrera</h2><p id="detailDate" class="muted"></p></div><button id="closeDetail" class="dialog-close" aria-label="Cerrar">×</button></div>
-    <div id="detailMap" class="detail-map" aria-label="Mapa del recorrido guardado"></div>
-    <div class="detail-stats">
-      <div><small>Distancia</small><strong id="detailDistance">0 km</strong></div>
-      <div><small>Tiempo</small><strong id="detailDuration">00:00</strong></div>
-      <div><small>Ritmo</small><strong id="detailPace">--:--</strong></div>
-      <div><small>Calorías</small><strong id="detailCalories">0</strong></div>
-    </div>
-    <button id="closeDetailBottom" class="btn btn-primary">Cerrar</button>
-  </dialog>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="app.js"></script>
-</body>
-</html>
+<header class="topbar"><a class="brand" href="#" aria-label="ZUÑIGA RUNNING inicio"><span class="brand-mark">ZR</span><span><strong>ZUÑIGA</strong><small>RUNNING</small></span></a><span class="gps-pill"><span id="gpsDot" class="dot"></span><span id="gpsStatus">GPS listo</span></span></header>
+<main class="shell">
+<section class="intro"><p class="eyebrow">TU SIGUIENTE META EMPIEZA AQUÍ</p><h1>Cada kilómetro<br><em>cuenta.</em></h1><p class="muted">Corre, camina y sigue tu progreso.</p></section>
+<section class="tracker panel" aria-label="Entrenamiento actual"><div class="tracker-head"><span class="live-label"><span class="live-dot"></span> ENTRENAMIENTO</span><span id="activityLabel" class="muted small">Sin iniciar</span></div><div class="distance-block"><div id="distance" class="distance">0.00 <span>km</span></div><div class="metric-caption">DISTANCIA</div></div><div class="metrics-grid"><div class="metric"><span id="duration">00:00:00</span><small>TIEMPO</small></div><div class="metric"><span id="pace">--:--</span><small>RITMO / KM</small></div><div class="metric"><span id="calories">0</span><small>CALORÍAS EST.*</small></div></div><div class="route-wrap"><div class="route-heading"><span>Mapa en vivo</span><span id="pointsLabel">Esperando GPS</span></div><div id="liveMap" class="map-box" aria-label="Mapa del recorrido en vivo"></div></div><div class="tracker-actions"><button id="startBtn" class="btn btn-primary">▶ Iniciar entrenamiento</button><div id="activeActions" class="action-row" hidden><button id="pauseBtn" class="btn btn-secondary">Ⅱ Pausar</button><button id="finishBtn" class="btn btn-finish">■ Finalizar</button></div></div><p class="hint">Permite el acceso a la ubicación. Para esta prueba mantén la pantalla encendida; después probaremos pantalla apagada.</p></section>
+<section class="section-block"><div class="section-title"><div><p class="eyebrow">TU CONSTANCIA</p><h2>Tu progreso</h2></div><span class="period-tag">Todo el tiempo</span></div><div class="stats-grid"><article class="stat-card"><span class="stat-icon">↗</span><small>Distancia total</small><strong id="totalDistance">0.00 <i>km</i></strong></article><article class="stat-card"><span class="stat-icon">◷</span><small>Tiempo en movimiento</small><strong id="totalTime">0 h 00 min</strong></article><article class="stat-card"><span class="stat-icon">🏁</span><small>Actividades</small><strong id="totalActivities">0</strong></article><article class="stat-card"><span class="stat-icon">✦</span><small>Mejor ritmo medio</small><strong id="bestPace">--:-- <i>/km</i></strong></article></div></section>
+<section class="section-block history-section"><div class="section-title"><div><p class="eyebrow">HECHO POR TI</p><h2>Historial</h2></div><button id="exportBtn" class="text-button">Exportar datos ↗</button></div><div id="historyList" class="history-list"></div><p id="emptyHistory" class="empty-state">Todavía no hay actividades. ¡Tu primera salida puede ser hoy!</p></section>
+<section class="notice"><strong>Importante</strong><p>* Las calorías son una estimación orientativa. La distancia y el ritmo dependen de la señal GPS. Tus entrenamientos se guardan en este dispositivo; si borras los datos del navegador, podrías perderlos.</p></section><footer>HECHO PARA AVANZAR · ZUÑIGA RUNNING <span>v1.1</span></footer></main>
+<dialog id="finishDialog" class="finish-dialog"><div class="dialog-mark">✓</div><p class="eyebrow">ACTIVIDAD GUARDADA</p><h2>Buen trabajo.</h2><p class="muted">Terminaste otra salida. Cada paso suma.</p><div class="dialog-stats"><div><small>Distancia</small><strong id="finalDistance">0 km</strong></div><div><small>Tiempo</small><strong id="finalDuration">00:00</strong></div><div><small>Ritmo</small><strong id="finalPace">--:--</strong></div></div><button id="closeDialog" class="btn btn-primary">Continuar</button></dialog>
+<dialog id="detailDialog" class="detail-dialog"><div class="detail-head"><div><p class="eyebrow">ACTIVIDAD</p><h2 id="detailTitle">Carrera</h2><p id="detailDate" class="muted"></p></div><button id="closeDetail" class="dialog-close" aria-label="Cerrar">×</button></div><div id="detailMap" class="detail-map" aria-label="Mapa del recorrido guardado"></div><div class="detail-stats"><div><small>Distancia</small><strong id="detailDistance">0 km</strong></div><div><small>Tiempo</small><strong id="detailDuration">00:00</strong></div><div><small>Ritmo</small><strong id="detailPace">--:--</strong></div><div><small>Calorías</small><strong id="detailCalories">0</strong></div></div><button id="closeDetailBottom" class="btn btn-primary">Cerrar</button></dialog>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script><script src="app.js"></script>
+</body></html>
