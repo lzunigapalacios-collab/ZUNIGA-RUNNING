@@ -1,4 +1,4 @@
-const CACHE_NAME = "zr-shell-v1";
+const CACHE_NAME = "zr-shell-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -19,8 +19,16 @@ self.addEventListener("fetch", event => {
   const url = new URL(request.url);
   const sameOrigin = url.origin === self.location.origin;
   if (sameOrigin) {
+    const isHtml = request.mode === "navigate" || url.pathname.endsWith(".html") || url.pathname.endsWith("/");
+    if (isHtml) {
+      event.respondWith(fetch(request).then(response => {
+        if (response.ok) caches.open(CACHE_NAME).then(cache => cache.put(request, response.clone()));
+        return response;
+      }).catch(() => caches.match(request).then(cached => cached || caches.match("./index.html"))));
+      return;
+    }
     event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {
-      if (response.ok && (url.pathname.endsWith(".js") || url.pathname.endsWith(".css") || url.pathname.endsWith(".html") || url.pathname.endsWith(".json") || url.pathname.endsWith(".svg"))) {
+      if (response.ok && (url.pathname.endsWith(".js") || url.pathname.endsWith(".css") || url.pathname.endsWith(".json") || url.pathname.endsWith(".svg"))) {
         const copy = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
       }
