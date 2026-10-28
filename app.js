@@ -5,7 +5,7 @@
   const state = {active:false,paused:false,watchId:null,startedAt:0,segmentStartedAt:0,elapsedBeforeSegment:0,elapsedMs:0,distance:0,points:[],lastPoint:null,lastSplitKm:0,splits:[],maxSpeedKmh:0,wakeLock:null};
   let activities=loadActivities(),ticker=null,liveMap=null,liveLine=null,liveStart=null,liveEnd=null,detailMap=null,detailLine=null,roadsData=null,roadsLoadPromise=null;
   
-  function loadActivities(){try{let data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");if(!Array.isArray(data)||!data.length){const old=JSON.parse(localStorage.getItem("zuniga-running-activities-v1")||"[]");data=Array.isArray(old)?old:[]}return data;}catch{return[]}}
+  function loadActivities(){try{const current=localStorage.getItem(STORAGE_KEY);if(current!==null){const data=JSON.parse(current);return Array.isArray(data)?data:[]}const legacy=JSON.parse(localStorage.getItem("zuniga-running-activities-v1")||"[]");const data=Array.isArray(legacy)?legacy:[];localStorage.setItem(STORAGE_KEY,JSON.stringify(data));return data;}catch{return[]}}
   function saveActivities(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(activities))}catch{alert("No se pudieron guardar los datos. El almacenamiento del navegador está lleno.")}}
   function fmtTime(ms){const s=Math.max(0,Math.floor(ms/1000));return [Math.floor(s/3600),Math.floor((s%3600)/60),s%60].map(n=>String(n).padStart(2,"0")).join(":")}
   function fmtShortTime(ms){const s=Math.max(0,Math.floor(ms/1000));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
