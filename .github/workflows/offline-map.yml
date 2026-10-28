@@ -24,17 +24,18 @@ jobs:
         run: mkdir -p data vendor/leaflet
       - name: Descargar calles de OpenStreetMap para Chahuites
         run: |
-          query='[out:json][timeout:30];way["highway"](16.25,-94.24,16.32,-94.15);out geom;'
+          query='[out:json][timeout:25];way["highway"](16.25,-94.24,16.32,-94.15);out geom;'
           for endpoint in \
             "https://maps.mail.ru/osm/tools/overpass/api/interpreter" \
             "https://lz4.overpass-api.de/api/interpreter" \
             "https://overpass.private.coffee/api/interpreter"; do
             echo "Intentando fuente OSM: $endpoint"
-            if curl --fail --silent --show-error --max-time 35 --retry 1 --retry-delay 2 \
-              -A "ZunigaRunningOfflineMap/1.0 (OpenStreetMap data; public GitHub project)" \
-              -X POST "$endpoint" \
-              -H "Content-Type: application/x-www-form-urlencoded" \
-              --data-urlencode "data=$query" \
+            if curl --fail --silent --show-error --connect-timeout 8 --max-time 30 \
+              -A "ZUÑIGA RUNNING offline map builder/1.0 (https://github.com/lzunigapalacios-collab/ZUNIGA-RUNNING)" \
+              -H "Accept: application/json" \
+              -H "Referer: https://lzunigapalacios-collab.github.io/ZUNIGA-RUNNING/" \
+              -H "Content-Type: text/plain; charset=utf-8" \
+              --data-binary "$query" "$endpoint" \
               -o data/overpass-roads.json; then
               if python3 -c 'import json; d=json.load(open("data/overpass-roads.json")); assert d.get("elements")'; then
                 exit 0
