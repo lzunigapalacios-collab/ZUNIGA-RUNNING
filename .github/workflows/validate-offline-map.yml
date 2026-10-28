@@ -39,5 +39,5 @@ jobs:
           test -s vendor/leaflet/leaflet.css
           grep -q './vendor/leaflet/leaflet.js' index.html
           grep -q 'id="mapMode"' index.html
-          grep -q 'zr-shell-v3' sw.js
+          grep -q 'zr-shell-v4' sw.js
           echo "OK: motor de mapa, selector y caché offline presentes"
