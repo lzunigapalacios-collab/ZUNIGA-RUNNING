@@ -1,0 +1,53 @@
+name: Preparar mapa offline de Chahuites
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - ".github/workflows/offline-map.yml"
+      - "scripts/build-offline-roads.py"
+  workflow_dispatch:
+  schedule:
+    - cron: "23 8 1 * *"
+
+permissions:
+  contents: write
+
+jobs:
+  build-offline-map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+      - name: Preparar carpetas
+        run: mkdir -p data vendor/leaflet
+      - name: Descargar calles de OpenStreetMap para Chahuites
+        run: |
+          curl --fail --silent --show-error --retry 3 --retry-delay 3 \
+            -X POST "https://overpass-api.de/api/interpreter" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            --data-urlencode 'data=[out:json][timeout:90];way["highway"](16.25,-94.24,16.32,-94.15);out geom;' \
+            -o data/overpass-roads.json
+      - name: Convertir calles a GeoJSON offline
+        run: python3 scripts/build-offline-roads.py
+      - name: Guardar Leaflet local para abrir el mapa sin internet
+        run: |
+          curl --fail --silent --show-error --retry 3 -L \
+            "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" -o vendor/leaflet/leaflet.js
+          curl --fail --silent --show-error --retry 3 -L \
+            "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" -o vendor/leaflet/leaflet.css
+          test -s vendor/leaflet/leaflet.js
+          test -s vendor/leaflet/leaflet.css
+      - name: Guardar datos cartográficos y librería
+        run: |
+          rm -f data/overpass-roads.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/chahuites-roads.geojson vendor/leaflet/leaflet.js vendor/leaflet/leaflet.css
+          if git diff --cached --quiet; then
+            echo "El mapa y Leaflet no cambiaron."
+          else
+            git commit -m "Prepare offline streets map for Chahuites"
+            git push
+          fi
