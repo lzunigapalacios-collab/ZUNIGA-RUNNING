@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101a16">
+  <meta name="description" content="ZUÑIGA RUNNING: registra tus carreras y caminatas con GPS, ritmo, distancia e historial.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <title>ZUÑIGA RUNNING</title>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="ZUÑIGA RUNNING inicio">
+      <span class="brand-mark">ZR</span>
+      <span><strong>ZUÑIGA</strong><small>RUNNING</small></span>
+    </a>
+    <span class="gps-pill"><span id="gpsDot" class="dot"></span><span id="gpsStatus">GPS listo</span></span>
+  </header>
+
+  <main class="shell">
+    <section class="intro">
+      <p class="eyebrow">TU SIGUIENTE META EMPIEZA AQUÍ</p>
+      <h1>Cada kilómetro<br><em>cuenta.</em></h1>
+      <p class="muted">Corre, camina y sigue tu progreso.</p>
+    </section>
+
+    <section class="tracker panel" aria-label="Entrenamiento actual">
+      <div class="tracker-head"><span class="live-label"><span class="live-dot"></span> ENTRENAMIENTO</span><span id="activityLabel" class="muted small">Sin iniciar</span></div>
+      <div class="distance-block">
+        <div id="distance" class="distance">0.00 <span>km</span></div>
+        <div class="metric-caption">DISTANCIA</div>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric"><span id="duration">00:00:00</span><small>TIEMPO</small></div>
+        <div class="metric"><span id="pace">--:--</span><small>RITMO / KM</small></div>
+        <div class="metric"><span id="calories">0</span><small>CALORÍAS EST.*</small></div>
+      </div>
+      <div class="route-wrap">
+        <div class="route-heading"><span>Tu recorrido</span><span id="pointsLabel">Esperando GPS</span></div>
+        <svg id="routeSvg" viewBox="0 0 320 110" role="img" aria-label="Dibujo del recorrido GPS">
+          <path class="route-grid" d="M0 27H320 M0 55H320 M0 83H320 M53 0V110 M106 0V110 M159 0V110 M212 0V110 M265 0V110"/>
+          <path id="routePath" class="route-line" d=""/>
+          <circle id="routeStart" cx="0" cy="0" r="4" class="route-start" opacity="0"/>
+          <circle id="routeEnd" cx="0" cy="0" r="5" class="route-end" opacity="0"/>
+          <text id="routePlaceholder" x="160" y="60" text-anchor="middle">Tu ruta aparecerá aquí</text>
+        </svg>
+      </div>
+      <div class="tracker-actions">
+        <button id="startBtn" class="btn btn-primary">▶ Iniciar entrenamiento</button>
+        <div id="activeActions" class="action-row" hidden>
+          <button id="pauseBtn" class="btn btn-secondary">Ⅱ Pausar</button>
+          <button id="finishBtn" class="btn btn-finish">■ Finalizar</button>
+        </div>
+      </div>
+      <p class="hint">Permite el acceso a la ubicación y mantén esta página abierta durante tu actividad. El GPS funciona en HTTPS.</p>
+    </section>
+
+    <section class="section-block">
+      <div class="section-title"><div><p class="eyebrow">TU CONSTANCIA</p><h2>Tu progreso</h2></div><span class="period-tag">Todo el tiempo</span></div>
+      <div class="stats-grid">
+        <article class="stat-card"><span class="stat-icon">↗</span><small>Distancia total</small><strong id="totalDistance">0.00 <i>km</i></strong></article>
+        <article class="stat-card"><span class="stat-icon">◷</span><small>Tiempo en movimiento</small><strong id="totalTime">0 h 00 min</strong></article>
+        <article class="stat-card"><span class="stat-icon">🏁</span><small>Actividades</small><strong id="totalActivities">0</strong></article>
+        <article class="stat-card"><span class="stat-icon">✦</span><small>Mejor ritmo medio</small><strong id="bestPace">--:-- <i>/km</i></strong></article>
+      </div>
+    </section>
+
+    <section class="section-block history-section">
+      <div class="section-title"><div><p class="eyebrow">HECHO POR TI</p><h2>Historial</h2></div><button id="exportBtn" class="text-button">Exportar datos ↗</button></div>
+      <div id="historyList" class="history-list"></div>
+      <p id="emptyHistory" class="empty-state">Todavía no hay actividades. ¡Tu primera salida puede ser hoy!</p>
+    </section>
+
+    <section class="notice"><strong>Importante</strong><p>* Las calorías son una estimación orientativa. La distancia y el ritmo dependen de la señal GPS. Tus entrenamientos se guardan en este dispositivo; si borras los datos del navegador, podrías perderlos.</p></section>
+    <footer>HECHO PARA AVANZAR · ZUÑIGA RUNNING <span>v1.0</span></footer>
+  </main>
+
+  <dialog id="finishDialog" class="finish-dialog">
+    <div class="dialog-mark">✓</div><p class="eyebrow">ACTIVIDAD GUARDADA</p><h2>Buen trabajo.</h2>
+    <p class="muted">Terminaste otra salida. Cada paso suma.</p>
+    <div class="dialog-stats"><div><small>Distancia</small><strong id="finalDistance">0 km</strong></div><div><small>Tiempo</small><strong id="finalDuration">00:00</strong></div><div><small>Ritmo</small><strong id="finalPace">--:--</strong></div></div>
+    <button id="closeDialog" class="btn btn-primary">Continuar</button>
+  </dialog>
+  <script src="app.js"></script>
+</body>
+</html>
