@@ -2,7 +2,7 @@ name: Validar mapa offline
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, ai-coordinator-dev]
     paths:
       - "index.html"
       - "app.js"
@@ -23,6 +23,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Comprobar sintaxis JavaScript
         run: node --check app.js
+          node --check sw.js
       - name: Comprobar datos del mapa
         run: |
           python3 - <<'PY'
@@ -39,5 +40,5 @@ jobs:
           test -s vendor/leaflet/leaflet.css
           grep -q './vendor/leaflet/leaflet.js' index.html
           grep -q 'id="mapMode"' index.html
-          grep -q 'zr-shell-v5' sw.js
+          grep -Eq 'const CACHE_NAME = "zr-shell-v[0-9]+"' sw.js
           echo "OK: motor de mapa, selector y caché offline presentes"
