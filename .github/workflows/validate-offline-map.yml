@@ -2,7 +2,7 @@ name: Validar mapa offline
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, ai-coordinator-dev]
     paths:
       - "index.html"
       - "app.js"
@@ -23,6 +23,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Comprobar sintaxis JavaScript
         run: node --check app.js
+          node --check sw.js
       - name: Comprobar datos del mapa
         run: |
           python3 - <<'PY'
